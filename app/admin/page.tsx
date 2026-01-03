@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "Admin kontrol paneli",
 };
 
+export const dynamic = 'force-dynamic';
+
 async function getStats() {
   try {
     const [totalProducts, totalOrders, totalUsers, totalRevenue] =

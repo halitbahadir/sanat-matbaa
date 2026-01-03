@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   title: "Sipariş Yönetimi - Admin Panel",
 };
 
+export const dynamic = 'force-dynamic';
+
 async function getOrders() {
   try {
     return await prisma.order.findMany({

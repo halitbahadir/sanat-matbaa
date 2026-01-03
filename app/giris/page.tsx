@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { User, Mail, Lock, AlertCircle } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
@@ -18,6 +18,11 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const errorMessage = searchParams?.get("error");
+  if (errorMessage === "unauthorized" && !error) {
+    setError("Bu sayfaya erişim yetkiniz yok");
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,11 +96,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
-  const errorMessage = searchParams?.get("error");
-  if (errorMessage === "unauthorized") {
-    setError("Bu sayfaya erişim yetkiniz yok");
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brown-50 to-brown-100 py-12 px-4">
@@ -247,5 +247,22 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block bg-brown-800 p-3 rounded mb-4">
+            <span className="text-gold-500 font-bold text-2xl">SM</span>
+          </div>
+          <p className="text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

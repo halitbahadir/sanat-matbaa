@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   title: "Ürün Yönetimi - Admin Panel",
 };
 
+export const dynamic = 'force-dynamic';
+
 async function getProducts() {
   try {
     return await prisma.product.findMany({
@@ -74,7 +76,7 @@ export default async function ProductsPage() {
                 </td>
               </tr>
             ) : (
-              products.map((product: { id: string; name: string; category: string; price: number; stock: number; active: boolean }) => (
+              products.map((product: any) => (
                 <tr key={product.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
