@@ -20,14 +20,14 @@ export default function MobileAppSection() {
               <button className="bg-gray-900 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-gray-800 transition flex items-center gap-2 text-sm sm:text-base">
                 <span>📱</span>
                 <div className="text-left">
-                  <div className="text-[10px] sm:text-xs">Google Play'den</div>
+                  <div className="text-[10px] sm:text-xs">Google Play&apos;den</div>
                   <div className="text-xs sm:text-sm font-bold">İndir</div>
                 </div>
               </button>
               <button className="bg-gray-900 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-gray-800 transition flex items-center gap-2 text-sm sm:text-base">
                 <span>📱</span>
                 <div className="text-left">
-                  <div className="text-[10px] sm:text-xs">App Store'dan</div>
+                  <div className="text-[10px] sm:text-xs">App Store&apos;dan</div>
                   <div className="text-xs sm:text-sm font-bold">İndir</div>
                 </div>
               </button>

@@ -9,12 +9,12 @@ export default function TestimonialSection() {
             </div>
           </div>
           <blockquote className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium text-gray-800 leading-relaxed mb-4 sm:mb-6 px-4">
-            "Tüm matbaa ihtiyaçlarınız için. Broşürlerinizi, kartvizitlerinizi, davetiyelerinizi 
-            ve etkinlik programlarınızı tasarlayıp basıyoruz. Sadece mürekkep değil... Çözümler."
+            &quot;Tüm matbaa ihtiyaçlarınız için. Broşürlerinizi, kartvizitlerinizi, davetiyelerinizi 
+            ve etkinlik programlarınızı tasarlayıp basıyoruz. Sadece mürekkep değil... Çözümler.&quot;
           </blockquote>
           <div className="text-gray-600">
             <p className="font-semibold text-sm sm:text-base">Eddy M.</p>
-            <p className="text-xs sm:text-sm">Liff'te Tasarımcı</p>
+            <p className="text-xs sm:text-sm">Liff&apos;te Tasarımcı</p>
           </div>
         </div>
       </div>
