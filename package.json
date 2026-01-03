@@ -11,6 +11,9 @@
     "migrate": "prisma migrate deploy",
     "db:push": "prisma db push"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@prisma/client": "^5.12.0",
     "@types/bcryptjs": "^2.4.6",
