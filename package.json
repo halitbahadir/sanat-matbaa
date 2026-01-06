@@ -38,5 +38,7 @@
     "typescript": "^5.3.0",
     "zustand": "^4.5.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "dotenv": "^17.2.3"
+  }
 }

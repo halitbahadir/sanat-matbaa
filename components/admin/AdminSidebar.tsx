@@ -11,10 +11,12 @@ import {
   Settings,
   LogOut,
   Home,
+  FolderTree,
 } from "lucide-react";
 
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/admin" },
+  { name: "Kategoriler", icon: FolderTree, path: "/admin/kategoriler" },
   { name: "Ürünler", icon: Package, path: "/admin/urunler" },
   { name: "Siparişler", icon: ShoppingCart, path: "/admin/siparisler" },
   { name: "Kullanıcılar", icon: Users, path: "/admin/kullanicilar" },
