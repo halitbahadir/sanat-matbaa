@@ -7,12 +7,53 @@ const path = require('path');
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = dev ? 'localhost' : '0.0.0.0';
 const port = parseInt(process.env.PORT || '3000', 10);
+
+function existsDir(p) {
+  try {
+    return fs.existsSync(p) && fs.statSync(p).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+function existsFile(p) {
+  try {
+    return fs.existsSync(p) && fs.statSync(p).isFile();
+  } catch {
+    return false;
+  }
+}
+
 // Hostinger'da çalışma dizini (cwd) bazen proje kökü olmayabiliyor.
-// Bu yüzden tüm yolları __dirname (server.js'in bulunduğu klasör) üzerinden çözüyoruz.
-const appDir = __dirname;
+// Bu yüzden proje kökünü otomatik bulup tüm yolları oradan çözüyoruz.
+function findProjectRoot() {
+  const candidates = [process.cwd(), __dirname];
+  for (const start of candidates) {
+    let cur = start;
+    for (let i = 0; i < 6; i += 1) {
+      const nextDir = path.join(cur, '.next');
+      const staticDir = path.join(nextDir, 'static');
+      const buildId = path.join(nextDir, 'BUILD_ID');
+      const pkg = path.join(cur, 'package.json');
+      if (existsDir(staticDir) && existsFile(buildId)) return cur;
+      // Build henüz oluşmadıysa bile package.json bulunan dizini fallback al
+      if (existsFile(pkg)) {
+        // ama daha üstte .next varsa onu tercih et
+        // (loop devam)
+      }
+      const parent = path.dirname(cur);
+      if (parent === cur) break;
+      cur = parent;
+    }
+  }
+  // Son çare: server.js'in bulunduğu dizin
+  return __dirname;
+}
+
+const appDir = findProjectRoot();
 try {
   process.chdir(appDir);
-} catch (e) {
+} catch {
   // ignore
 }
 
@@ -50,6 +91,41 @@ app.prepare().then(() => {
     try {
       const parsedUrl = parse(req.url, true);
       const pathname = parsedUrl.pathname || '';
+      // Tanılama: İstek Node'a geliyor mu?
+      res.setHeader('X-App-Server', 'custom-next-server');
+
+      // Sağlık / debug endpoint (opsiyonel güvenlik: DEBUG_TOKEN set değilse 404)
+      if (pathname === '/__health') {
+        const token = parsedUrl.query?.token;
+        if (!process.env.DEBUG_TOKEN || token !== process.env.DEBUG_TOKEN) {
+          res.statusCode = 404;
+          res.end('Not found');
+          return;
+        }
+        const info = {
+          node: process.version,
+          env: process.env.NODE_ENV || null,
+          cwd: process.cwd(),
+          appDir,
+          port,
+          buildId: buildId || null,
+          staticDir,
+          staticDirExists: existsDir(staticDir),
+          staticSamples: [],
+        };
+        try {
+          const chunksDir = path.join(staticDir, 'chunks');
+          if (existsDir(chunksDir)) {
+            info.staticSamples = fs.readdirSync(chunksDir).slice(0, 10);
+          }
+        } catch {
+          // ignore
+        }
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.statusCode = 200;
+        res.end(JSON.stringify(info, null, 2));
+        return;
+      }
       
       // _next/static dosyaları için doğrudan serve et
       if (pathname.startsWith('/_next/static/')) {
