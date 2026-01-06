@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone', // Hostinger için optimize edilmiş build
+  // Standalone mode kaldırıldı - custom server.js kullanıyoruz
+  // output: 'standalone', // Custom server.js ile uyumsuz
+  
   images: {
     domains: ['localhost'],
     remotePatterns: [
@@ -10,10 +12,14 @@ const nextConfig = {
       },
     ],
   },
+  
   // Production optimizasyonları
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  
+  // Static dosyalar için optimizasyon
+  trailingSlash: false,
 };
 
 module.exports = nextConfig;

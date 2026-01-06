@@ -50,11 +50,13 @@ app.prepare().then(() => {
         if (buildId && pathParts[0] === buildId) {
           fullPath = path.join(staticDir, buildId, pathParts.slice(1).join('/'));
         } else {
+          // Build ID olmadan da dene
           fullPath = path.join(staticDir, pathAfterStatic);
         }
         
         // Dosya var mı kontrol et
         if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+          console.log(`> Serving static file: ${pathname} -> ${fullPath}`);
           // Content-Type belirle
           let contentType = 'application/octet-stream';
           if (fullPath.endsWith('.js')) {
@@ -83,6 +85,22 @@ app.prepare().then(() => {
           res.writeHead(200);
           res.end(fileContent);
           return;
+        } else {
+          // Dosya bulunamadı - logla
+          console.error(`> Static file NOT found: ${fullPath}`);
+          console.error(`> Requested path: ${pathname}`);
+          console.error(`> Build ID: ${buildId}`);
+          console.error(`> Static dir: ${staticDir}`);
+          
+          // Static dir içeriğini listele (debug için)
+          if (fs.existsSync(staticDir)) {
+            try {
+              const staticContents = fs.readdirSync(staticDir);
+              console.error(`> Static dir contents: ${staticContents.join(', ')}`);
+            } catch (e) {
+              console.error(`> Could not read static dir: ${e.message}`);
+            }
+          }
         }
       }
       
