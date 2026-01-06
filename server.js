@@ -7,20 +7,31 @@ const path = require('path');
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = dev ? 'localhost' : '0.0.0.0';
 const port = parseInt(process.env.PORT || '3000', 10);
+// Hostinger'da çalışma dizini (cwd) bazen proje kökü olmayabiliyor.
+// Bu yüzden tüm yolları __dirname (server.js'in bulunduğu klasör) üzerinden çözüyoruz.
+const appDir = __dirname;
+try {
+  process.chdir(appDir);
+} catch (e) {
+  // ignore
+}
 
 const app = next({ 
   dev,
   hostname,
   port,
+  dir: appDir,
 });
 
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
   console.log('> Next.js app prepared successfully');
+  console.log(`> cwd: ${process.cwd()}`);
+  console.log(`> appDir: ${appDir}`);
   
-  const staticDir = path.join(process.cwd(), '.next', 'static');
-  const buildIdFile = path.join(process.cwd(), '.next', 'BUILD_ID');
+  const staticDir = path.join(appDir, '.next', 'static');
+  const buildIdFile = path.join(appDir, '.next', 'BUILD_ID');
   
   let buildId = null;
   if (fs.existsSync(buildIdFile)) {
@@ -32,6 +43,7 @@ app.prepare().then(() => {
     console.log('> ✓ .next/static directory exists');
   } else {
     console.error('> ✗ ERROR: .next/static directory not found!');
+    console.error(`> Expected staticDir: ${staticDir}`);
   }
   
   createServer(async (req, res) => {
