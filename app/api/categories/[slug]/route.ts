@@ -78,9 +78,9 @@ export async function PUT(
 
     const supabase = createSupabaseServerClient();
     const identifier = params.slug;
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
 
-    const { data: category, error } = await supabase
+    // First try to update by ID
+    let { data: category, error } = await supabase
       .from("Category")
       .update({
         name,
@@ -88,9 +88,26 @@ export async function PUT(
         description: description || null,
         updatedAt: new Date().toISOString(),
       })
-      .eq(isUUID ? "id" : "slug", identifier)
+      .eq("id", identifier)
       .select()
       .single();
+
+    // If not found by ID, try by slug
+    if (error || !category) {
+      const result = await supabase
+        .from("Category")
+        .update({
+          name,
+          slug,
+          description: description || null,
+          updatedAt: new Date().toISOString(),
+        })
+        .eq("slug", identifier)
+        .select()
+        .single();
+      category = result.data;
+      error = result.error;
+    }
 
     if (error || !category) {
       if (error?.code === 'PGRST116') {
