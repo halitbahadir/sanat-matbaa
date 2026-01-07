@@ -1,10 +1,17 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 
 export default function WhatsAppFloat() {
+  const pathname = usePathname();
   const phoneNumber = "905326223367"; // WhatsApp formatında
   const message = "Merhaba, ürünleriniz hakkında bilgi almak istiyorum.";
+
+  // Hide on admin pages
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   const handleClick = () => {
     window.open(
