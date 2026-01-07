@@ -98,3 +98,4 @@ SET
 -- Kategorileri kontrol et
 SELECT id, name, slug, description FROM "Category" ORDER BY name;
 
+

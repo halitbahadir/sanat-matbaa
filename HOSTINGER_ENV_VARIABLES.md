@@ -91,3 +91,4 @@ Environment variables ekledikten sonra:
 2. Server'ı yeniden başlatın (redeploy)
 3. Runtime Logs'da hata olmamalı
 
+

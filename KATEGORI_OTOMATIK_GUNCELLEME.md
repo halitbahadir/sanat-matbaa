@@ -67,3 +67,4 @@ useEffect(() => {
 - ✅ **Her zaman fresh data çekilir (cache yok)**
 - ⚠️ **Sayfa açıkken otomatik refresh yok (isteğe bağlı eklenebilir)**
 
+

@@ -48,3 +48,4 @@ DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.vvhpzepcitbbwffvruos.supa
 4. `.env.local` dosyasına yapıştır (password'ü ekle)
 5. Server'ı yeniden başlat: `npm run dev`
 
+

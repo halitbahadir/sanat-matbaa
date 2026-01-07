@@ -68,3 +68,4 @@ Artık local ve Hostinger'da aynı Node.js versiyonu kullanılıyor:
 - **Hostinger:** Node.js 18.x
 - **Uyumluluk:** ✅ Mükemmel!
 
+

@@ -11,3 +11,4 @@ export const categoryIcons: Record<string, string> = {
   'dugun-davetiyeleri': '💌',
 };
 
+

@@ -137,3 +137,4 @@ Hostinger Panel → **Build Logs**:
 
 Artık her `git push` yaptığınızda Hostinger otomatik olarak deploy edecek!
 
+

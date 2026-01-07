@@ -160,3 +160,4 @@ npm run build
 ### 🚀 Sonuç
 **Evet, bu haliyle sorunsuz çalışır!** Sadece Hostinger panelinde `DATABASE_URL` environment variable'ını ayarlamanız yeterli.
 
+

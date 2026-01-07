@@ -91,3 +91,4 @@ postgresql://postgres.vvhpzepcitbbwffvruos:MySecurePassword123@aws-0-eu-central-
 - Browser console'da hata var mı kontrol edin
 - `.env.local` dosyasının proje root'unda olduğundan emin olun
 
+

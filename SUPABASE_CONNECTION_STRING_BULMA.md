@@ -30,3 +30,4 @@ Eğer Database linki görünmüyorsa:
 postgresql://postgres.vvhpzepcitbbwffvruos:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres?pgbouncer=true
 ```
 
+

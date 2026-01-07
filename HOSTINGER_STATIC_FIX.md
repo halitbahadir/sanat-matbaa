@@ -75,3 +75,4 @@ Eğer hala sorun varsa:
 2. `.next/static` klasörünün var olduğunu kontrol edin
 3. Dosya izinlerini kontrol edin
 
+

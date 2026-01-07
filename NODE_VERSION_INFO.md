@@ -62,3 +62,4 @@ source ~/.zshrc
 
 Sadece tam uyum için 18'e geçmek isterseniz yukarıdaki adımları kullanın.
 
+

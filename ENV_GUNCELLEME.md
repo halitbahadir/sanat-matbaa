@@ -58,3 +58,4 @@ npm run dev
 
 3. **Tırnak İşaretleri:** .env dosyasında connection string'i tırnak içine alın.
 
+

@@ -31,3 +31,4 @@ Eğer sayfada connection string göremiyorsanız:
 - **"Connection string"** veya **"Connection info"** başlığını arayın
 - Veya sayfanın **sağ tarafında** bir panel olabilir
 
+

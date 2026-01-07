@@ -106,3 +106,4 @@ return 'production-build-v2'; // Yeni versiyon
 - Static file isteklerini kontrol edin
 - "Static file NOT found" mesajları varsa build'i kontrol edin
 
+
