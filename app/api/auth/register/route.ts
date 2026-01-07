@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   try {
@@ -13,33 +13,41 @@ export async function POST(request: Request) {
       );
     }
 
-    // Kullanıcı zaten var mı kontrol et
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
+    const supabase = createSupabaseServerClient();
+    const normalizedEmail = String(email).trim().toLowerCase();
+
+    const { data, error } = await supabase.auth.signUp({
+      email: normalizedEmail,
+      password,
+      options: {
+        data: { name },
+      },
     });
 
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "Bu e-posta adresi zaten kullanılıyor" },
-        { status: 400 }
-      );
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    // Şifreyi hashle
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Kullanıcı oluştur
-    const user = await prisma.user.create({
-      data: {
+    // Ensure profile row exists (password no longer used)
+    const user = await prisma.user.upsert({
+      where: { email: normalizedEmail },
+      create: {
         name,
-        email,
-        password: hashedPassword,
+        email: normalizedEmail,
+        password: "SUPABASE_AUTH",
         role: "user",
+      },
+      update: {
+        name,
       },
     });
 
     return NextResponse.json(
-      { message: "Kayıt başarılı", userId: user.id },
+      {
+        message: "Kayıt başarılı",
+        userId: user.id,
+        needsEmailConfirmation: !data.session,
+      },
       { status: 201 }
     );
   } catch (error: any) {

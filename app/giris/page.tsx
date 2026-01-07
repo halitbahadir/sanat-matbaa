@@ -3,8 +3,8 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { User, Mail, Lock, AlertCircle } from "lucide-react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 function LoginForm() {
   const [isLogin, setIsLogin] = useState(true);
@@ -30,16 +30,19 @@ function LoginForm() {
     setError("");
 
     try {
-      const result = await signIn("credentials", {
-        email: formData.email,
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email.trim().toLowerCase(),
         password: formData.password,
-        redirect: false,
       });
 
-      if (result?.error) {
+      if (error) {
         setError("E-posta veya şifre hatalı");
         setLoading(false);
       } else {
+        // Profile sync (best-effort)
+        fetch("/api/profile", { method: "POST" }).catch(() => {});
+
         router.push("/");
         router.refresh();
       }
@@ -61,35 +64,35 @@ function LoginForm() {
     }
 
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
+      const supabase = createSupabaseBrowserClient();
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name,
+          },
+        },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Kayıt başarısız");
+      if (error) {
+        setError(error.message || "Kayıt başarısız");
         setLoading(false);
       } else {
-        // Kayıt başarılı, otomatik giriş yap
-        const result = await signIn("credentials", {
-          email: formData.email,
-          password: formData.password,
-          redirect: false,
-        });
-
-        if (result?.error) {
-          setError("Kayıt başarılı ancak giriş yapılamadı. Lütfen giriş yapın.");
-        } else {
-          router.push("/");
-          router.refresh();
+        // If email confirmation is enabled, session can be null
+        if (!data.session) {
+          setError(
+            "Kayıt başarılı. E-posta doğrulaması gerekiyorsa mailini kontrol et, sonra giriş yap."
+          );
+          setLoading(false);
+          return;
         }
+
+        // Profile sync
+        fetch("/api/profile", { method: "POST" }).catch(() => {});
+
+        router.push("/");
+        router.refresh();
       }
     } catch (err) {
       setError("Kayıt sırasında bir hata oluştu");

@@ -1,10 +1,45 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOptions";
+import { prisma } from "@/lib/prisma";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function getCurrentUser() {
   try {
-    const session = await getServerSession(authOptions);
-    return session?.user || null;
+    const supabase = createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user?.email) return null;
+
+    const email = user.email.trim().toLowerCase();
+
+    // Ensure Prisma profile exists (best-effort)
+    try {
+      await prisma.user.upsert({
+        where: { email },
+        create: {
+          email,
+          name:
+            (user.user_metadata as any)?.name ||
+            (user.user_metadata as any)?.full_name ||
+            null,
+          role: "user",
+          password: "SUPABASE_AUTH",
+        },
+        update: {},
+      });
+    } catch {
+      // ignore
+    }
+
+    const dbUser = await prisma.user.findUnique({ where: { email } });
+    if (!dbUser) return null;
+
+    return {
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name,
+      role: (dbUser as any).role || "user",
+    };
   } catch (error) {
     console.error("Error getting session:", error);
     return null;
