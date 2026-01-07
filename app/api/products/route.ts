@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
 
 // Simüle edilmiş ürün verileri - gerçek uygulamada veritabanından gelecek
-const products = [
+const products: Array<{
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  category: string;
+  description: string;
+  stock?: number;
+  active?: boolean;
+}> = [
   {
     id: "1",
     name: "506 Plastik Kalem",
@@ -9,6 +18,8 @@ const products = [
     image: "/products/kalem-506.jpg",
     category: "firsat",
     description: "Kişiye özel baskılı plastik kalem",
+    stock: 0,
+    active: true,
   },
   {
     id: "2",
@@ -17,6 +28,8 @@ const products = [
     image: "/products/kalem-fiyat-performans.jpg",
     category: "firsat",
     description: "Ekonomik ve kaliteli plastik kalem",
+    stock: 0,
+    active: true,
   },
   {
     id: "3",
@@ -25,6 +38,8 @@ const products = [
     image: "/products/kalem-klipsli.jpg",
     category: "firsat",
     description: "Klipsli özel tasarım plastik kalem",
+    stock: 0,
+    active: true,
   },
   {
     id: "4",
@@ -33,6 +48,8 @@ const products = [
     image: "/products/kalem-1506.jpg",
     category: "firsat",
     description: "Toplu alım için özel fiyat",
+    stock: 0,
+    active: true,
   },
   {
     id: "5",
@@ -41,6 +58,8 @@ const products = [
     image: "/products/cakmak-ozel.jpg",
     category: "firsat",
     description: "Kişiye özel logo baskılı çakmak",
+    stock: 0,
+    active: true,
   },
   {
     id: "6",
@@ -49,6 +68,8 @@ const products = [
     image: "/products/cakmak-siyah.jpg",
     category: "firsat",
     description: "Siyah renk özel baskılı çakmak",
+    stock: 0,
+    active: true,
   },
 ];
 

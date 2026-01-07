@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
 
 // Simüle edilmiş ürün verileri
-const products = [
+const products: Array<{
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  category: string;
+  description: string;
+  stock?: number;
+  active?: boolean;
+}> = [
   {
     id: "1",
     name: "506 Plastik Kalem",
@@ -10,6 +19,8 @@ const products = [
     category: "firsat",
     description:
       "Yüksek kaliteli plastik malzemeden üretilmiş, kişiye özel baskılı kalem. Şirketinizin logosu veya özel mesajınızla basılabilir.",
+    stock: 0,
+    active: true,
   },
   {
     id: "2",
@@ -18,6 +29,8 @@ const products = [
     image: "/products/kalem-fiyat-performans.jpg",
     category: "firsat",
     description: "Ekonomik ve kaliteli plastik kalem. Toplu alımlar için ideal.",
+    stock: 0,
+    active: true,
   },
   {
     id: "3",
@@ -26,6 +39,8 @@ const products = [
     image: "/products/kalem-klipsli.jpg",
     category: "firsat",
     description: "Klipsli özel tasarım plastik kalem. Cebinizde taşıması kolay.",
+    stock: 0,
+    active: true,
   },
   {
     id: "4",
@@ -34,6 +49,8 @@ const products = [
     image: "/products/kalem-1506.jpg",
     category: "firsat",
     description: "Toplu alım için özel fiyat. Minimum 300 adet sipariş.",
+    stock: 0,
+    active: true,
   },
   {
     id: "5",
@@ -42,6 +59,8 @@ const products = [
     image: "/products/cakmak-ozel.jpg",
     category: "firsat",
     description: "Kişiye özel logo baskılı çakmak. Dayanıklı ve şık tasarım.",
+    stock: 0,
+    active: true,
   },
   {
     id: "6",
@@ -50,6 +69,8 @@ const products = [
     image: "/products/cakmak-siyah.jpg",
     category: "firsat",
     description: "Siyah renk özel baskılı çakmak. Profesyonel görünüm.",
+    stock: 0,
+    active: true,
   },
 ];
 
