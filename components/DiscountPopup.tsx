@@ -8,12 +8,12 @@ export default function DiscountPopup() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Hide on admin pages
-  if (pathname?.startsWith("/admin")) {
-    return null;
-  }
-
   useEffect(() => {
+    // Hide on admin pages
+    if (pathname?.startsWith("/admin")) {
+      return;
+    }
+
     // LocalStorage'dan kontrol et - daha önce gösterildi mi?
     const hasSeenPopup = localStorage.getItem("hasSeenDiscountPopup");
     
@@ -25,7 +25,12 @@ export default function DiscountPopup() {
 
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [pathname]);
+
+  // Hide on admin pages
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   const handleClose = () => {
     setIsOpen(false);
