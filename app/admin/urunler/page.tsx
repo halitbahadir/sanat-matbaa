@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Plus, Edit, Trash2 } from "lucide-react";
 
@@ -13,9 +13,18 @@ export const dynamic = 'force-dynamic';
 
 async function getProducts() {
   try {
-    return await prisma.product.findMany({
-      orderBy: { createdAt: "desc" },
-    });
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("Product")
+      .select("*")
+      .order("createdAt", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching products:", error);
+      return [];
+    }
+
+    return data || [];
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];

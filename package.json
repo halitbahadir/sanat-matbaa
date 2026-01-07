@@ -6,32 +6,24 @@
     "dev": "next dev",
     "build": "next build",
     "start": "node server.js",
-    "lint": "next lint",
-    "postinstall": "prisma generate",
-    "migrate": "prisma migrate deploy",
-    "db:push": "prisma db push"
+    "lint": "next lint"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@prisma/client": "^5.12.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.1",
-    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "autoprefixer": "^10.4.18",
-    "bcryptjs": "^3.0.3",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.2.0",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.344.0",
     "next": "^14.2.0",
-    "next-auth": "^4.24.5",
     "postcss": "^8.4.35",
-    "prisma": "^5.12.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-icons": "^5.2.0",

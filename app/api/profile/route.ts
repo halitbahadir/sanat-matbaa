@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -22,7 +21,7 @@ export async function GET() {
   }
 }
 
-// POST - Ensure there is a matching row in Prisma `User` table for the authenticated Supabase user.
+// POST - Ensure there is a matching row in User table for the authenticated Supabase user.
 export async function POST() {
   try {
     const supabase = createSupabaseServerClient();
@@ -41,26 +40,37 @@ export async function POST() {
       (user.user_metadata as any)?.full_name ||
       null;
 
-    if (!prisma || typeof prisma.user === "undefined") {
-      // Database not available, but don't fail - just return ok
-      console.warn("Prisma not available for profile sync");
-      return NextResponse.json({ ok: true });
-    }
-
     try {
-      await prisma.user.upsert({
-        where: { email },
-        create: {
-          email,
-          name,
-          role: "user",
-          // Not used when Supabase Auth is enabled; kept to satisfy schema.
-          password: "SUPABASE_AUTH",
-        },
-        update: {
-          name: name ?? undefined,
-        },
-      });
+      // Check if user exists
+      const { data: existingUser } = await supabase
+        .from("User")
+        .select("id")
+        .eq("email", email)
+        .single();
+
+      if (!existingUser) {
+        // Create new user
+        const { error: insertError } = await supabase
+          .from("User")
+          .insert({
+            email,
+            name,
+            role: "user",
+            password: "SUPABASE_AUTH", // Placeholder, not used with Supabase Auth
+          });
+
+        if (insertError) {
+          console.warn("Profile sync DB error (non-critical):", insertError.message);
+        }
+      } else {
+        // Update existing user name if provided
+        if (name) {
+          await supabase
+            .from("User")
+            .update({ name })
+            .eq("id", existingUser.id);
+        }
+      }
     } catch (dbError: any) {
       // Log but don't fail - user might not exist in DB yet
       console.warn("Profile sync DB error (non-critical):", dbError?.message);

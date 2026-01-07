@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
@@ -9,13 +9,14 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const category = await prisma.category.findUnique({
-      where: {
-        id: params.id,
-      },
-    });
+    const supabase = createSupabaseServerClient();
+    const { data: category, error } = await supabase
+      .from("Category")
+      .select("*")
+      .eq("id", params.id)
+      .single();
 
-    if (!category) {
+    if (error || !category) {
       return NextResponse.json(
         { error: "Kategori bulunamadı" },
         { status: 404 }
@@ -56,29 +57,36 @@ export async function PUT(
       );
     }
 
-    const category = await prisma.category.update({
-      where: {
-        id: params.id,
-      },
-      data: {
+    const supabase = createSupabaseServerClient();
+    const { data: category, error } = await supabase
+      .from("Category")
+      .update({
         name,
         slug,
-        description: description || "",
-        updatedAt: new Date(),
-      },
-    });
+        description: description || null,
+        updatedAt: new Date().toISOString(),
+      })
+      .eq("id", params.id)
+      .select()
+      .single();
+
+    if (error || !category) {
+      if (error?.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: "Kategori bulunamadı" },
+          { status: 404 }
+        );
+      }
+      console.error("Error updating category:", error);
+      return NextResponse.json(
+        { error: "Kategori güncellenirken bir hata oluştu" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(category);
   } catch (error: any) {
     console.error("Error updating category:", error);
-    
-    if (error.code === 'P2025') {
-      return NextResponse.json(
-        { error: "Kategori bulunamadı" },
-        { status: 404 }
-      );
-    }
-
     return NextResponse.json(
       { error: "Kategori güncellenirken bir hata oluştu" },
       { status: 500 }

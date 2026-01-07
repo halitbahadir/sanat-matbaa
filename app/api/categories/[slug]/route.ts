@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const dynamic = 'force-dynamic';
 
@@ -8,13 +8,14 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const category = await prisma.category.findUnique({
-      where: {
-        slug: params.slug,
-      },
-    });
+    const supabase = createSupabaseServerClient();
+    const { data: category, error } = await supabase
+      .from("Category")
+      .select("*")
+      .eq("slug", params.slug)
+      .single();
 
-    if (!category) {
+    if (error || !category) {
       return NextResponse.json(
         { error: "Kategori bulunamadı" },
         { status: 404 }

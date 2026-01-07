@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Sipariş Yönetimi - Admin Panel",
@@ -11,20 +11,23 @@ export const dynamic = 'force-dynamic';
 
 async function getOrders() {
   try {
-    return await prisma.order.findMany({
-      include: {
-        user: {
-          select: { name: true, email: true },
-        },
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 50,
-    });
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("Order")
+      .select(`
+        *,
+        user:User(id, name, email),
+        items:OrderItem(*, product:Product(*))
+      `)
+      .order("createdAt", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      console.error("Error fetching orders:", error);
+      return [];
+    }
+
+    return data || [];
   } catch (error) {
     console.error("Error fetching orders:", error);
     return [];

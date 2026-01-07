@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function getCurrentUser() {
@@ -12,18 +11,23 @@ export async function getCurrentUser() {
 
     const email = user.email.trim().toLowerCase();
 
-    // Ensure Prisma profile exists (best-effort)
-    // Don't create if doesn't exist - let it be created manually or via API
-    // This prevents accidentally creating users with wrong role
+    // Get user role from public.User table
+    const { data: dbUser, error } = await supabase
+      .from("User")
+      .select("id, email, name, role")
+      .eq("email", email)
+      .single();
 
-    const dbUser = await prisma.user.findUnique({ where: { email } });
-    if (!dbUser) return null;
+    if (error || !dbUser) {
+      console.error("Error fetching user from database:", error);
+      return null;
+    }
 
     return {
       id: dbUser.id,
       email: dbUser.email,
       name: dbUser.name,
-      role: (dbUser as any).role || "user",
+      role: dbUser.role || "user",
     };
   } catch (error) {
     console.error("Error getting session:", error);

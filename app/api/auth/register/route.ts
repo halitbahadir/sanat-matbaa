@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
@@ -28,24 +27,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    // Ensure profile row exists (password no longer used)
-    const user = await prisma.user.upsert({
-      where: { email: normalizedEmail },
-      create: {
-        name,
-        email: normalizedEmail,
-        password: "SUPABASE_AUTH",
-        role: "user",
-      },
-      update: {
-        name,
-      },
-    });
+    // Ensure profile row exists in User table
+    if (data.user) {
+      const { data: userData, error: dbError } = await supabase
+        .from("User")
+        .upsert({
+          email: normalizedEmail,
+          name,
+          password: "SUPABASE_AUTH", // Placeholder, not used with Supabase Auth
+          role: "user",
+        }, {
+          onConflict: "email",
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        console.warn("User profile creation error (non-critical):", dbError);
+      }
+
+      return NextResponse.json(
+        {
+          message: "Kayıt başarılı",
+          userId: userData?.id || data.user.id,
+          needsEmailConfirmation: !data.session,
+        },
+        { status: 201 }
+      );
+    }
 
     return NextResponse.json(
       {
         message: "Kayıt başarılı",
-        userId: user.id,
         needsEmailConfirmation: !data.session,
       },
       { status: 201 }

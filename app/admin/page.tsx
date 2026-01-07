@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import StatsCard from "@/components/admin/StatsCard";
 import { Package, ShoppingCart, Users, DollarSign } from "lucide-react";
 
@@ -14,22 +14,40 @@ export const dynamic = 'force-dynamic';
 
 async function getStats() {
   try {
-    const [totalProducts, totalOrders, totalUsers, totalRevenue] =
-      await Promise.all([
-        prisma.product.count({ where: { active: true } }).catch(() => 0),
-        prisma.order.count().catch(() => 0),
-        prisma.user.count().catch(() => 0),
-        prisma.order.aggregate({
-          _sum: { total: true },
-          where: { paymentStatus: "paid" },
-        }).catch(() => ({ _sum: { total: 0 } })),
+    const supabase = createSupabaseServerClient();
+
+    const [productsResult, ordersResult, usersResult, revenueResult] =
+      await Promise.allSettled([
+        supabase
+          .from("Product")
+          .select("id", { count: "exact", head: true })
+          .eq("active", true),
+        supabase
+          .from("Order")
+          .select("id", { count: "exact", head: true }),
+        supabase
+          .from("User")
+          .select("id", { count: "exact", head: true }),
+        supabase
+          .from("Order")
+          .select("total")
+          .eq("paymentStatus", "paid"),
       ]);
 
+    const products = productsResult.status === "fulfilled" ? productsResult.value : { count: 0 };
+    const orders = ordersResult.status === "fulfilled" ? ordersResult.value : { count: 0 };
+    const users = usersResult.status === "fulfilled" ? usersResult.value : { count: 0 };
+    const revenue = revenueResult.status === "fulfilled" ? revenueResult.value : { data: [] };
+
+    const totalRevenue = revenue.data
+      ? revenue.data.reduce((sum: number, order: any) => sum + (order.total || 0), 0)
+      : 0;
+
     return {
-      totalProducts,
-      totalOrders,
-      totalUsers,
-      totalRevenue: totalRevenue._sum?.total || 0,
+      totalProducts: products.count || 0,
+      totalOrders: orders.count || 0,
+      totalUsers: users.count || 0,
+      totalRevenue,
     };
   } catch (error) {
     console.error("Error fetching stats:", error);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
@@ -7,23 +7,20 @@ export const dynamic = 'force-dynamic';
 // GET - Tüm kategorileri listele
 export async function GET() {
   try {
-    // Prisma client'ın düzgün çalışıp çalışmadığını kontrol et
-    if (!prisma || typeof prisma.category === 'undefined') {
-      console.error("Prisma client not properly initialized");
-      return NextResponse.json([], { status: 200 }); // Return empty array instead of error
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("Category")
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching categories:", error);
+      return NextResponse.json([]);
     }
 
-    const categories = await prisma.category.findMany({
-      orderBy: {
-        name: 'asc',
-      },
-    });
-
-    return NextResponse.json(categories || []);
+    return NextResponse.json(data || []);
   } catch (error: any) {
     console.error("Error fetching categories:", error);
-    console.error("Error details:", error?.message, error?.code);
-    // Return empty array instead of error to prevent UI breakage
     return NextResponse.json([]);
   }
 }
@@ -50,10 +47,14 @@ export async function POST(request: Request) {
       );
     }
 
+    const supabase = createSupabaseServerClient();
+
     // Slug'un benzersiz olduğunu kontrol et
-    const existingCategory = await prisma.category.findUnique({
-      where: { slug },
-    });
+    const { data: existingCategory } = await supabase
+      .from("Category")
+      .select("id")
+      .eq("slug", slug)
+      .single();
 
     if (existingCategory) {
       return NextResponse.json(
@@ -62,13 +63,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const category = await prisma.category.create({
-      data: {
+    // Yeni kategori oluştur
+    const { data: category, error } = await supabase
+      .from("Category")
+      .insert({
         name,
         slug,
         description: description || null,
-      },
-    });
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error creating category:", error);
+      return NextResponse.json(
+        { error: "Kategori eklenirken bir hata oluştu" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(category, { status: 201 });
   } catch (error) {

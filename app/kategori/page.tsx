@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Kategoriler - SM Sanat Matbaası",
@@ -11,9 +11,18 @@ export const dynamic = 'force-dynamic';
 
 async function getCategories() {
   try {
-    return await prisma.category.findMany({
-      orderBy: { name: 'asc' },
-    });
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("Category")
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching categories:", error);
+      return [];
+    }
+
+    return data || [];
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
