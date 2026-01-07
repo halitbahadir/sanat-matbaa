@@ -39,8 +39,8 @@ async function getStats() {
     const users = usersResult.status === "fulfilled" ? usersResult.value : { count: 0 };
     const revenue = revenueResult.status === "fulfilled" ? revenueResult.value : { data: [] };
 
-    const totalRevenue = revenue.data
-      ? revenue.data.reduce((sum: number, order: any) => sum + (order.total || 0), 0)
+    const totalRevenue = revenue.data && Array.isArray(revenue.data)
+      ? revenue.data.reduce((sum: number, order: any) => sum + (Number(order.total) || 0), 0)
       : 0;
 
     return {
