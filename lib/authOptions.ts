@@ -21,15 +21,18 @@ export const authOptions: NextAuthOptions = {
 
           // Check if prisma is available
           if (!prisma || typeof prisma.user === 'undefined') {
-            console.warn("Database not available - authentication disabled");
+            console.warn("[auth] Database not available - authentication disabled");
             return null;
           }
 
+          const email = String(credentials.email).trim().toLowerCase();
+
           const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
+            where: { email },
           });
 
           if (!user) {
+            console.warn("[auth] User not found:", email);
             return null;
           }
 
@@ -39,6 +42,7 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (!isPasswordValid) {
+            console.warn("[auth] Invalid password for:", email);
             return null;
           }
 
@@ -49,7 +53,7 @@ export const authOptions: NextAuthOptions = {
             role: (user as any).role || "user",
           };
         } catch (error: any) {
-          console.error("Auth error:", error);
+          console.error("[auth] Auth error:", error?.message || error);
           // Return null - allows session endpoint to work without DB
           return null;
         }
