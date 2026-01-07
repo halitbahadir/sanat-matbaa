@@ -58,6 +58,7 @@ export async function PUT(
     }
 
     const supabase = createSupabaseServerClient();
+    // updatedAt Supabase'de otomatik güncelleniyorsa göndermeye gerek yok
     const { data: product, error } = await supabase
       .from("Product")
       .update({
@@ -68,7 +69,6 @@ export async function PUT(
         stock: stock || 0,
         image: image?.trim() || null,
         active: active !== false,
-        updatedAt: new Date().toISOString(),
       })
       .eq("id", params.id)
       .select()
@@ -85,6 +85,15 @@ export async function PUT(
       console.error("Error details:", JSON.stringify(error, null, 2));
       console.error("Product ID:", params.id);
       console.error("Update data:", { name, description, price, category, stock, image, active });
+      console.error("Update data (processed):", {
+        name,
+        description: description?.trim() || null,
+        price: parseFloat(price),
+        category: category?.trim() || null,
+        stock: stock || 0,
+        image: image?.trim() || null,
+        active: active !== false,
+      });
       return NextResponse.json(
         { error: error?.message || "Ürün güncellenirken bir hata oluştu", details: error },
         { status: 500 }
