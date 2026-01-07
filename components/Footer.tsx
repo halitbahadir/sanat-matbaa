@@ -1,8 +1,18 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
 import Logo from "./Logo";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Hide footer on admin pages
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <footer className="bg-gray-900 text-white mt-auto">
       <div className="max-w-[90%] 2xl:max-w-[1400px] mx-auto px-3 sm:px-4 md:px-6 py-8 sm:py-12">
