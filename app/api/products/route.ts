@@ -1,89 +1,36 @@
 import { NextResponse } from "next/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-// Simüle edilmiş ürün verileri - gerçek uygulamada veritabanından gelecek
-const products: Array<{
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-  description: string;
-  stock?: number;
-  active?: boolean;
-}> = [
-  {
-    id: "1",
-    name: "506 Plastik Kalem",
-    price: 8.5,
-    image: "/products/kalem-506.jpg",
-    category: "firsat",
-    description: "Kişiye özel baskılı plastik kalem",
-    stock: 0,
-    active: true,
-  },
-  {
-    id: "2",
-    name: "FİYAT-PERFORMANS ÜRÜNÜ | En çok tercih edilen",
-    price: 5.25,
-    image: "/products/kalem-fiyat-performans.jpg",
-    category: "firsat",
-    description: "Ekonomik ve kaliteli plastik kalem",
-    stock: 0,
-    active: true,
-  },
-  {
-    id: "3",
-    name: "Klipsli Plastik Kalem",
-    price: 8.5,
-    image: "/products/kalem-klipsli.jpg",
-    category: "firsat",
-    description: "Klipsli özel tasarım plastik kalem",
-    stock: 0,
-    active: true,
-  },
-  {
-    id: "4",
-    name: "1506 Kalem - 300 Adet",
-    price: 7.0,
-    image: "/products/kalem-1506.jpg",
-    category: "firsat",
-    description: "Toplu alım için özel fiyat",
-    stock: 0,
-    active: true,
-  },
-  {
-    id: "5",
-    name: "Özel Baskılı Çakmak",
-    price: 12.0,
-    image: "/products/cakmak-ozel.jpg",
-    category: "firsat",
-    description: "Kişiye özel logo baskılı çakmak",
-    stock: 0,
-    active: true,
-  },
-  {
-    id: "6",
-    name: "Siyah Özel Baskılı Çakmak",
-    price: 12.0,
-    image: "/products/cakmak-siyah.jpg",
-    category: "firsat",
-    description: "Siyah renk özel baskılı çakmak",
-    stock: 0,
-    active: true,
-  },
-];
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const category = searchParams.get("category");
+  try {
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get("category");
 
-  let filteredProducts = products;
+    const supabase = createSupabaseServerClient();
+    let query = supabase
+      .from("Product")
+      .select("*")
+      .eq("active", true)
+      .order("createdAt", { ascending: false });
 
-  if (category) {
-    filteredProducts = products.filter((p) => p.category === category);
+    if (category) {
+      query = query.eq("category", category);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching products:", error);
+      return NextResponse.json([]);
+    }
+
+    return NextResponse.json(data || []);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return NextResponse.json([]);
   }
-
-  return NextResponse.json(filteredProducts);
 }
 
 export async function POST(request: Request) {
@@ -108,19 +55,28 @@ export async function POST(request: Request) {
       );
     }
 
-    // Simüle edilmiş ürün oluşturma - gerçek uygulamada veritabanına kaydedilecek
-    const newProduct = {
-      id: String(products.length + 1),
-      name,
-      description: description || "",
-      price: parseFloat(price),
-      category: category || "",
-      stock: stock || 0,
-      image: image || "",
-      active: active !== false,
-    };
+    const supabase = createSupabaseServerClient();
+    const { data: newProduct, error } = await supabase
+      .from("Product")
+      .insert({
+        name,
+        description: description || null,
+        price: parseFloat(price),
+        category: category || null,
+        stock: stock || 0,
+        image: image || null,
+        active: active !== false,
+      })
+      .select()
+      .single();
 
-    products.push(newProduct);
+    if (error) {
+      console.error("Error creating product:", error);
+      return NextResponse.json(
+        { error: "Ürün oluşturulurken bir hata oluştu" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {
