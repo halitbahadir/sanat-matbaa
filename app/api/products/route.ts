@@ -56,10 +56,14 @@ export async function POST(request: Request) {
     }
 
     const supabase = createSupabaseServerClient();
-    // id, createdAt, updatedAt Supabase'de otomatik oluşturuluyorsa göndermeye gerek yok
+    // UUID oluştur (Node.js 18+ crypto.randomUUID() destekler)
+    const productId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    
     const { data: newProduct, error } = await supabase
       .from("Product")
       .insert({
+        id: productId,
         name,
         description: description || null,
         price: parseFloat(price),
@@ -67,6 +71,8 @@ export async function POST(request: Request) {
         stock: stock || 0,
         image: image || null,
         active: active !== false,
+        createdAt: now,
+        updatedAt: now,
       })
       .select()
       .single();
