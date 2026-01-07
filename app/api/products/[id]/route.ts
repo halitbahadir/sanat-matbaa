@@ -66,3 +66,59 @@ export async function GET(
   return NextResponse.json(product);
 }
 
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { getCurrentUser } = await import("@/lib/auth");
+    const user = await getCurrentUser();
+    
+    if (!user || (user as any).role !== "admin") {
+      return NextResponse.json(
+        { error: "Yetkisiz erişim" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { name, description, price, category, stock, image, active } = body;
+
+    if (!name || price === undefined) {
+      return NextResponse.json(
+        { error: "Ürün adı ve fiyat gereklidir" },
+        { status: 400 }
+      );
+    }
+
+    const productIndex = products.findIndex((p) => p.id === params.id);
+
+    if (productIndex === -1) {
+      return NextResponse.json(
+        { error: "Ürün bulunamadı" },
+        { status: 404 }
+      );
+    }
+
+    // Simüle edilmiş ürün güncelleme
+    products[productIndex] = {
+      ...products[productIndex],
+      name,
+      description: description || "",
+      price: parseFloat(price),
+      category: category || "",
+      stock: stock || 0,
+      image: image || "",
+      active: active !== false,
+    };
+
+    return NextResponse.json(products[productIndex]);
+  } catch (error) {
+    console.error("Error updating product:", error);
+    return NextResponse.json(
+      { error: "Ürün güncellenirken bir hata oluştu" },
+      { status: 500 }
+    );
+  }
+}
+

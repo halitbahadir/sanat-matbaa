@@ -65,3 +65,49 @@ export async function GET(request: Request) {
   return NextResponse.json(filteredProducts);
 }
 
+export async function POST(request: Request) {
+  try {
+    const { getCurrentUser } = await import("@/lib/auth");
+    const user = await getCurrentUser();
+    
+    if (!user || (user as any).role !== "admin") {
+      return NextResponse.json(
+        { error: "Yetkisiz erişim" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { name, description, price, category, stock, image, active } = body;
+
+    if (!name || price === undefined) {
+      return NextResponse.json(
+        { error: "Ürün adı ve fiyat gereklidir" },
+        { status: 400 }
+      );
+    }
+
+    // Simüle edilmiş ürün oluşturma - gerçek uygulamada veritabanına kaydedilecek
+    const newProduct = {
+      id: String(products.length + 1),
+      name,
+      description: description || "",
+      price: parseFloat(price),
+      category: category || "",
+      stock: stock || 0,
+      image: image || "",
+      active: active !== false,
+    };
+
+    products.push(newProduct);
+
+    return NextResponse.json(newProduct, { status: 201 });
+  } catch (error) {
+    console.error("Error creating product:", error);
+    return NextResponse.json(
+      { error: "Ürün oluşturulurken bir hata oluştu" },
+      { status: 500 }
+    );
+  }
+}
+
