@@ -12,14 +12,28 @@ export async function GET(
     const supabase = createSupabaseServerClient();
     const identifier = params.slug;
     
-    // Try to find by ID first (UUID format), then by slug
+    // Try to find by ID first, then by slug
+    // UUID format: 8-4-4-4-12 hex characters with dashes
+    // But also support other ID formats (like aSLlzAElYX0JLyFUi7l-V)
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
     
-    const { data: category, error } = await supabase
+    // First try by ID (if it looks like an ID)
+    let { data: category, error } = await supabase
       .from("Category")
       .select("*")
-      .eq(isUUID ? "id" : "slug", identifier)
+      .eq("id", identifier)
       .single();
+    
+    // If not found by ID, try by slug
+    if (error || !category) {
+      const result = await supabase
+        .from("Category")
+        .select("*")
+        .eq("slug", identifier)
+        .single();
+      category = result.data;
+      error = result.error;
+    }
 
     if (error || !category) {
       return NextResponse.json(

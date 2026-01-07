@@ -64,13 +64,19 @@ export async function POST(request: Request) {
     }
 
     // Yeni kategori oluştur
-    // id, createdAt, updatedAt Supabase'de otomatik oluşturuluyorsa göndermeye gerek yok
+    // UUID oluştur (Node.js 18+ crypto.randomUUID() destekler)
+    const categoryId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    
     const { data: category, error } = await supabase
       .from("Category")
       .insert({
+        id: categoryId,
         name,
         slug,
         description: description || null,
+        createdAt: now,
+        updatedAt: now,
       })
       .select()
       .single();
