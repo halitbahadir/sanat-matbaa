@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -13,6 +14,8 @@ import {
   LogOut,
   Home,
   FolderTree,
+  Menu,
+  X,
 } from "lucide-react";
 
 const menuItems = [
@@ -27,15 +30,45 @@ const menuItems = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-gray-900 text-white transition-transform lg:translate-x-0">
+    <>
+      {/* Mobile menu button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed top-4 left-4 z-50 lg:hidden p-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition"
+        aria-label="Toggle menu"
+      >
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`fixed left-0 top-0 z-50 h-screen w-64 bg-gray-900 text-white transition-transform duration-300 ease-in-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
+      >
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-16 items-center justify-center border-b border-gray-800 px-4">
-          <Link href="/admin" className="flex items-center gap-2">
+        <div className="flex h-16 items-center justify-between border-b border-gray-800 px-4">
+          <Link href="/admin" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
             <span className="text-xl font-bold">Admin Panel</span>
           </Link>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="lg:hidden text-gray-400 hover:text-white"
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {/* Menu */}
@@ -46,6 +79,7 @@ export default function AdminSidebar() {
               <Link
                 key={item.path}
                 href={item.path}
+                onClick={() => setIsOpen(false)}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
                   isActive
                     ? "bg-primary-600 text-white"
@@ -63,6 +97,7 @@ export default function AdminSidebar() {
         <div className="border-t border-gray-800 p-4">
           <Link
             href="/"
+            onClick={() => setIsOpen(false)}
             className="mb-2 flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white"
           >
             <Home size={20} />

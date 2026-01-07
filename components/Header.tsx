@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Search, ShoppingCart, User, Phone, MapPin, Star, Menu } from "lucide-react";
 import CategoryNav from "./CategoryNav";
@@ -8,10 +9,16 @@ import Logo from "./Logo";
 import { useCart } from "@/store/cartStore";
 
 export default function Header() {
+  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { items } = useCart();
   const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Hide header on admin pages
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <header className="bg-white sticky top-0 z-50">
