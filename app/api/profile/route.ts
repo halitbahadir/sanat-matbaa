@@ -1,8 +1,28 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 
-// Ensure there is a matching row in Prisma `User` table for the authenticated Supabase user.
+// GET - Get current user profile with role
+export async function GET() {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.json({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: (user as any).role || "user",
+    });
+  } catch (e: any) {
+    console.error("Profile get error:", e?.message || e);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+  }
+}
+
+// POST - Ensure there is a matching row in Prisma `User` table for the authenticated Supabase user.
 export async function POST() {
   try {
     const supabase = createSupabaseServerClient();

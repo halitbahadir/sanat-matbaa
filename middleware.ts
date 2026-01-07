@@ -29,7 +29,24 @@ export async function middleware(request: NextRequest) {
   });
 
   // Refresh session if needed (no-op if no session)
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Protect admin routes
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (!user?.email) {
+      // Not logged in, redirect to login
+      const loginUrl = new URL("/giris", request.url);
+      loginUrl.searchParams.set("error", "unauthorized");
+      loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // Check if user is admin (we need to check DB, but for middleware we'll do a quick check)
+    // Full role check happens in layout.tsx, but we can block non-authenticated users here
+    // The actual role check is done in app/admin/layout.tsx
+  }
 
   return response;
 }

@@ -43,7 +43,24 @@ function LoginForm() {
         // Profile sync (best-effort)
         fetch("/api/profile", { method: "POST" }).catch(() => {});
 
-        router.push("/");
+        // Check user role and redirect accordingly
+        try {
+          // Wait a bit for profile sync, then check role
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          const profileRes = await fetch("/api/profile");
+          if (profileRes.ok) {
+            const profile = await profileRes.json();
+            if (profile.role === "admin") {
+              router.push("/admin");
+            } else {
+              router.push("/");
+            }
+          } else {
+            router.push("/");
+          }
+        } catch {
+          router.push("/");
+        }
         router.refresh();
       }
     } catch (err) {

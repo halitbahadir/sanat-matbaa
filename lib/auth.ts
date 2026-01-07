@@ -25,7 +25,13 @@ export async function getCurrentUser() {
           role: "user",
           password: "SUPABASE_AUTH",
         },
-        update: {},
+        update: {
+          // Update name if available, but preserve existing role
+          name:
+            (user.user_metadata as any)?.name ||
+            (user.user_metadata as any)?.full_name ||
+            undefined,
+        },
       });
     } catch {
       // ignore
