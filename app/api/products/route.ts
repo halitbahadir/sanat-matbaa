@@ -59,6 +59,7 @@ export async function POST(request: Request) {
     const { data: newProduct, error } = await supabase
       .from("Product")
       .insert({
+        id: crypto.randomUUID(),
         name,
         description: description || null,
         price: parseFloat(price),
@@ -66,14 +67,17 @@ export async function POST(request: Request) {
         stock: stock || 0,
         image: image || null,
         active: active !== false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       })
       .select()
       .single();
 
     if (error) {
       console.error("Error creating product:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
       return NextResponse.json(
-        { error: "Ürün oluşturulurken bir hata oluştu" },
+        { error: error.message || "Ürün oluşturulurken bir hata oluştu", details: error },
         { status: 500 }
       );
     }

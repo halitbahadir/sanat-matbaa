@@ -67,17 +67,21 @@ export async function POST(request: Request) {
     const { data: category, error } = await supabase
       .from("Category")
       .insert({
+        id: crypto.randomUUID(),
         name,
         slug,
         description: description || null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       })
       .select()
       .single();
 
     if (error) {
       console.error("Error creating category:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
       return NextResponse.json(
-        { error: "Kategori eklenirken bir hata oluştu" },
+        { error: error.message || "Kategori eklenirken bir hata oluştu", details: error },
         { status: 500 }
       );
     }

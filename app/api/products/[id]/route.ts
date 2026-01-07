@@ -82,8 +82,11 @@ export async function PUT(
         );
       }
       console.error("Error updating product:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
+      console.error("Product ID:", params.id);
+      console.error("Update data:", { name, description, price, category, stock, image, active });
       return NextResponse.json(
-        { error: "Ürün güncellenirken bir hata oluştu" },
+        { error: error?.message || "Ürün güncellenirken bir hata oluştu", details: error },
         { status: 500 }
       );
     }
