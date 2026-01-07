@@ -13,29 +13,8 @@ export async function getCurrentUser() {
     const email = user.email.trim().toLowerCase();
 
     // Ensure Prisma profile exists (best-effort)
-    try {
-      await prisma.user.upsert({
-        where: { email },
-        create: {
-          email,
-          name:
-            (user.user_metadata as any)?.name ||
-            (user.user_metadata as any)?.full_name ||
-            null,
-          role: "user",
-          password: "SUPABASE_AUTH",
-        },
-        update: {
-          // Update name if available, but preserve existing role
-          name:
-            (user.user_metadata as any)?.name ||
-            (user.user_metadata as any)?.full_name ||
-            undefined,
-        },
-      });
-    } catch {
-      // ignore
-    }
+    // Don't create if doesn't exist - let it be created manually or via API
+    // This prevents accidentally creating users with wrong role
 
     const dbUser = await prisma.user.findUnique({ where: { email } });
     if (!dbUser) return null;
