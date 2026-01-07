@@ -56,10 +56,10 @@ export async function POST(request: Request) {
     }
 
     const supabase = createSupabaseServerClient();
+    // id, createdAt, updatedAt Supabase'de otomatik oluşturuluyorsa göndermeye gerek yok
     const { data: newProduct, error } = await supabase
       .from("Product")
       .insert({
-        id: crypto.randomUUID(),
         name,
         description: description || null,
         price: parseFloat(price),
@@ -67,8 +67,6 @@ export async function POST(request: Request) {
         stock: stock || 0,
         image: image || null,
         active: active !== false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       })
       .select()
       .single();

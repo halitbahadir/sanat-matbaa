@@ -64,15 +64,13 @@ export async function POST(request: Request) {
     }
 
     // Yeni kategori oluştur
+    // id, createdAt, updatedAt Supabase'de otomatik oluşturuluyorsa göndermeye gerek yok
     const { data: category, error } = await supabase
       .from("Category")
       .insert({
-        id: crypto.randomUUID(),
         name,
         slug,
         description: description || null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       })
       .select()
       .single();
