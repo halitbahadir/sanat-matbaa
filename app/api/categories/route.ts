@@ -10,10 +10,7 @@ export async function GET() {
     // Prisma client'ın düzgün çalışıp çalışmadığını kontrol et
     if (!prisma || typeof prisma.category === 'undefined') {
       console.error("Prisma client not properly initialized");
-      return NextResponse.json(
-        { error: "Veritabanı bağlantısı yapılandırılmamış. DATABASE_URL kontrol edin." },
-        { status: 500 }
-      );
+      return NextResponse.json([], { status: 200 }); // Return empty array instead of error
     }
 
     const categories = await prisma.category.findMany({
@@ -22,17 +19,12 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(categories);
+    return NextResponse.json(categories || []);
   } catch (error: any) {
     console.error("Error fetching categories:", error);
     console.error("Error details:", error?.message, error?.code);
-    return NextResponse.json(
-      { 
-        error: "Kategoriler yüklenirken bir hata oluştu",
-        details: process.env.NODE_ENV === 'development' ? error?.message : undefined
-      },
-      { status: 500 }
-    );
+    // Return empty array instead of error to prevent UI breakage
+    return NextResponse.json([]);
   }
 }
 
