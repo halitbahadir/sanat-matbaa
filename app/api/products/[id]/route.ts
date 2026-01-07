@@ -62,11 +62,11 @@ export async function PUT(
       .from("Product")
       .update({
         name,
-        description: description || null,
+        description: description?.trim() || null,
         price: parseFloat(price),
-        category: category || null,
+        category: category?.trim() || null,
         stock: stock || 0,
-        image: image || null,
+        image: image?.trim() || null,
         active: active !== false,
         updatedAt: new Date().toISOString(),
       })
